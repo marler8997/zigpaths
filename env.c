@@ -14,8 +14,8 @@ RtlQueryEnvironmentVariable_U(PWSTR Environment,
    PWSTR val;
    BOOLEAN SysEnvUsed = FALSE;
 
-   DPRINT("RtlQueryEnvironmentVariable_U Environment %p Variable %wZ Value %p\n",
-          Environment, Name, Value);
+   DPRINT("RtlQueryEnvironmentVariable_U Environment %p Variable '%.*S' Value %p\n",
+          Environment, Name->Length/2, Name->Buffer, Value);
 
    if (Environment == NULL)
    {
@@ -83,6 +83,6 @@ RtlQueryEnvironmentVariable_U(PWSTR Environment,
    if (SysEnvUsed)
       RtlReleasePebLock();
 
-   DPRINT("Return STATUS_VARIABLE_NOT_FOUND: %wZ\n", Name);
+   DPRINT("Return STATUS_VARIABLE_NOT_FOUND: '%.*S'\n", Name->Length/2, Name->Buffer);
    return(STATUS_VARIABLE_NOT_FOUND);
 }

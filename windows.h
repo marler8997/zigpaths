@@ -73,7 +73,10 @@ typedef struct _UNICODE_STRING {
   USHORT Length;
   USHORT MaximumLength;
   PWSTR  Buffer;
-} UNICODE_STRING, *PUNICODE_STRING, *PCUNICODE_STRING;
+} UNICODE_STRING, *PUNICODE_STRING;
+
+typedef const UNICODE_STRING *PCUNICODE_STRING;
+
 static inline UNICODE_STRING initUnicodeStringByteSizes(PWSTR Buffer, USHORT LengthBytes, USHORT CapacityBytes)
 {
   UNICODE_STRING str = { LengthBytes, CapacityBytes, Buffer };
@@ -130,11 +133,14 @@ typedef void* HANDLE;
 
 #define MAX_PATH 260
 
-struct CurrentDirectory {
-  UNICODE_STRING DosPath;
-};
+typedef struct _CURDIR
+{
+    UNICODE_STRING DosPath;
+    HANDLE Handle;
+} CURDIR, *PCURDIR;
+
 struct ProcessParameters {
-  struct CurrentDirectory CurrentDirectory;
+  CURDIR CurrentDirectory;
   PWSTR Environment;
 };
 struct PEB {

@@ -1,3 +1,5 @@
+char *GetPathTypeString(RTL_PATH_TYPE type);
+
 RTL_PATH_TYPE
 NTAPI
 RtlDetermineDosPathNameType_U(IN PCWSTR Path);

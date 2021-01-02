@@ -40,6 +40,8 @@ static void test_RtlDetermineDosPathNameType_U(void)
         { L"/\\foo" , RtlPathTypeUncAbsolute },
         { L"\\\\"   , RtlPathTypeUncAbsolute },
         { L"//"     , RtlPathTypeUncAbsolute },
+        { L"\\/"    , RtlPathTypeUncAbsolute },
+        { L"/\\"    , RtlPathTypeUncAbsolute },
 
         { L"c:\\foo", RtlPathTypeDriveAbsolute },
         { L"c:/foo" , RtlPathTypeDriveAbsolute },
@@ -73,7 +75,8 @@ static void test_RtlDetermineDosPathNameType_U(void)
     for (const struct test *test = tests; test->path; test++)
     {
         RTL_PATH_TYPE result = RtlDetermineDosPathNameType_U(test->path);
-        expect(result == test->ret, "expected path type %d but got %d for path '%s'\n", result, test->ret, test->path );
+        expect(result == test->ret, "expected path type %s(%d) but got %s(%d) for path '%S'\n",
+               GetPathTypeString(test->ret), test->ret, GetPathTypeString(result), result, test->path );
     }
 }
 
@@ -335,12 +338,6 @@ static void test_RtlDosPathNameToNtPathName_U_WithStatus(void)
     UNICODE_STRING nameW;
     NTSTATUS status;
 
-    if (!pRtlDosPathNameToNtPathName_U_WithStatus)
-    {
-        win_skip("RtlDosPathNameToNtPathName_U_WithStatus() is not supported.\n");
-        return;
-    }
-
     GetCurrentDirectoryW( MAX_PATH, path );
 
     status = pRtlDosPathNameToNtPathName_U_WithStatus( path, &nameW, NULL, NULL );
@@ -403,6 +400,8 @@ int main(int argc, char *argv[]) {
 
   test(L"foo", L"\\??\\C:\\tmp\\foo");
   test(L"foo*o", L"\\??\\C:\\tmp\\foo*o");
+  test(L"foo\\.", L"\\??\\C:\\tmp\\foo");
+  test(L"foo\\..", L"\\??\\C:\\tmp");
   //test(L"LPT", L"LPT");
   // TODO: this is causing an infinite loop!
   //test(L"CON");

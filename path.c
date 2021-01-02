@@ -469,7 +469,7 @@ RtlGetFullPathName_Ustr(
 
     /* For now, assume the name is valid */
     DPRINT("Filename '%.*S'\n", FileName->Length / 2, FileName->Buffer);
-    DPRINT("Size and buffer: %lx %p\n", Size, Buffer);
+    DPRINT("Size and buffer: %u %p\n", Size, Buffer);
     if (InvalidName) *InvalidName = FALSE;
 
     /* Handle initial path type and failure case */
@@ -504,7 +504,7 @@ RtlGetFullPathName_Ustr(
 
     /* Check if this is a DOS name */
     DosLength = RtlIsDosDeviceName_Ustr(FileName);
-    DPRINT("DOS length for filename: %lx '%.*S'\n", DosLength, FileName->Length/2, FileName->Buffer);
+    DPRINT("DOS length for filename: %u '%.*S'\n", DosLength, FileName->Length/2, FileName->Buffer);
     if (DosLength != 0)
     {
         /* Zero out the short name */
@@ -860,7 +860,7 @@ RtlpWin32NTNameToNtPathName_U(IN PUNICODE_STRING DosPath,
 }
 
 
-static char *GetPathTypeString(RTL_PATH_TYPE type)
+char *GetPathTypeString(RTL_PATH_TYPE type)
 {
   switch(type) {
     case RtlPathTypeUnknown: return "Unknown";
@@ -884,7 +884,7 @@ RtlpDosPathNameToRelativeNtPathName_Ustr(IN BOOLEAN HaveRelative,
                                          OUT PRTL_RELATIVE_NAME_U RelativeName)
 {
     WCHAR BigBuffer[MAX_PATH + 1];
-    PWCHAR PrefixBuffer, NewBuffer, Buffer;
+    PWCHAR PrefixBuffer, Buffer;
     ULONG PathLength, PrefixLength, PrefixCut, LengthChars, Length;
     UNICODE_STRING CapturedDosName, PartNameString, FullPath;
     BOOLEAN QuickPath;
@@ -904,6 +904,7 @@ RtlpDosPathNameToRelativeNtPathName_Ustr(IN BOOLEAN HaveRelative,
     /* Capture input string */
     CapturedDosName = *DosName;
 
+    PWCHAR NewBuffer;
     /* Check for the presence or absence of the NT prefix "\\?\" form */
     // if (!RtlPrefixUnicodeString(&RtlpWin32NtRootSlash, &CapturedDosName, FALSE))
     if ((CapturedDosName.Length <= RtlpWin32NtRootSlash.Length) ||
@@ -961,7 +962,7 @@ RtlpDosPathNameToRelativeNtPathName_Ustr(IN BOOLEAN HaveRelative,
     if ((NameInvalid) || !(PathLength) || (PathLength > (MAX_PATH * sizeof(WCHAR))))
     {
         /* Invalid name, fail */
-        DPRINT("Invalid name: %lx Path Length: %lx\n", NameInvalid, PathLength);
+        DPRINT("Invalid name: %u Path Length: %u\n", NameInvalid, PathLength);
         RtlFreeHeap(RtlGetProcessHeap(), 0, NewBuffer);
         RtlReleasePebLock();
         return STATUS_OBJECT_NAME_INVALID;
@@ -1081,7 +1082,7 @@ RtlpDosPathNameToRelativeNtPathName_Ustr(IN BOOLEAN HaveRelative,
                         RelativeName->RelativeName.Length -= sizeof(WCHAR);
                     }
                     RelativeName->RelativeName.MaximumLength = RelativeName->RelativeName.Length;
-                    DPRINT("RelativeName: %wZ\n", &(RelativeName->RelativeName));
+                    DPRINT("RelativeName: '%.*S'\n", RelativeName->RelativeName.Length/2, RelativeName->RelativeName.Buffer);
 
                     if (!HaveRelative)
                     {
@@ -1115,7 +1116,7 @@ RtlDosPathNameToRelativeNtPathName_Ustr(IN PCUNICODE_STRING DosName,
                                         OUT PRTL_RELATIVE_NAME_U RelativeName)
 {
     /* Call the internal function */
-    ASSERT(RelativeName);
+    ASSERT(RelativeName != NULL);
     return NT_SUCCESS(RtlpDosPathNameToRelativeNtPathName_Ustr(TRUE,
                                                                DosName,
                                                                NtName,

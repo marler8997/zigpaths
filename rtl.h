@@ -47,12 +47,6 @@ typedef enum _RTL_PATH_TYPE
     RtlPathTypeRootLocalDevice,
 } RTL_PATH_TYPE;
 
-typedef struct _CURDIR
-{
-    UNICODE_STRING DosPath;
-    HANDLE Handle;
-} CURDIR, *PCURDIR;
-
 typedef struct _RTLP_CURDIR_REF
 {
     LONG RefCount;
