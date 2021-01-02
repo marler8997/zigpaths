@@ -12,8 +12,6 @@ static LOGICAL RtlFreeHeap(void* heap_handle, ULONG flags, void* addr)
   return TRUE;
 }
 
-static void RtlAcquirePebLock() { }
-static void RtlReleasePebLock() { }
 static void RtlZeroMemory(void* mem, size_t len)
 {
   memset(mem, 0, len);
@@ -21,6 +19,10 @@ static void RtlZeroMemory(void* mem, size_t len)
 static void RtlCopyMemory(void* dest, const void* src, size_t len)
 {
   memcpy(dest, src, len);
+}
+static void RtlMoveMemory(void* dest, const void* src, size_t len)
+{
+  memmove(dest, src, len);
 }
 
 static void RtlInitEmptyUnicodeString(
