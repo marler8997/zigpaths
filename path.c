@@ -4,8 +4,6 @@
 #include "doesfileexists.h"
 #include "env.h"
 
-#define MAX_PATH 260
-
 #define DPRINT(fmt,...) do { fprintf(stderr, fmt, ##__VA_ARGS__); fflush(stderr); } while (0)
 //#define DPRINT1(fmt,...) do { fprintf(stderr, fmt, ##__VA_ARGS__); fflush(stderr); } while (0)
 

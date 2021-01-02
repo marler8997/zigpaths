@@ -1,3 +1,7 @@
+RTL_PATH_TYPE
+NTAPI
+RtlDetermineDosPathNameType_U(IN PCWSTR Path);
+
 BOOLEAN
 NTAPI
 RtlDosPathNameToRelativeNtPathName_Ustr(IN PCUNICODE_STRING DosName,

@@ -28,7 +28,7 @@ typedef size_t SIZE_T;
 typedef void VOID, *PVOID;
 typedef uint16_t WORD;
 typedef int32_t LONG;
-typedef uint32_t ULONG, DWORD;
+typedef uint32_t ULONG, DWORD, UINT;
 typedef int64_t LONGLONG;
 typedef size_t ULONG_PTR;
 
@@ -127,6 +127,8 @@ static void ASSERT(int cond) {
 
 typedef void* HANDLE;
 
+
+#define MAX_PATH 260
 
 struct CurrentDirectory {
   UNICODE_STRING DosPath;
