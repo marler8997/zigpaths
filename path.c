@@ -297,7 +297,7 @@ RtlpCheckDeviceName(IN PUNICODE_STRING FileName,
  *
  * Returns the full path length without its terminating NULL character.
  */
-static ULONG
+ULONG
 RtlpCollapsePath(PWSTR Path, /* ULONG PathBufferSize, ULONG PathLength, */ ULONG mark, BOOLEAN SkipTrailingPathSeparators)
 {
     PWSTR p, next;

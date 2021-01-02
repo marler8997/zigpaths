@@ -9,6 +9,9 @@ NTAPI
 RtlIsDosDeviceName_Ustr(IN PCUNICODE_STRING PathString);
 
 ULONG
+RtlpCollapsePath(PWSTR Path, /* ULONG PathBufferSize, ULONG PathLength, */ ULONG mark, BOOLEAN SkipTrailingPathSeparators);
+
+ULONG
 NTAPI
 RtlGetFullPathName_Ustr(
     _In_ PUNICODE_STRING FileName,

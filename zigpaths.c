@@ -394,11 +394,24 @@ static void testGetFullPathName(PCWSTR FileName, PCWSTR Expected) {
 
   ULONG result_length = RtlGetFullPathName_Ustr(&FileNameUstr, sizeof(Buffer), Buffer, NULL, &NameInvalid, &PathType);
   expect(!NameInvalid, "path '%S' got NameInvalid", FileName);
-  expect(result_length > 0, "GetFullPathName for '%S' failed", FileName);
   fprintf(stderr, "--------\ntest     '%S'\nexpected '%S'\nactual   '%.*S'\n",
           FileName,
           Expected,
-          result_length, Buffer);
+          (int)(result_length / sizeof(WCHAR)), Buffer);
+  expect(result_length / sizeof(WCHAR) == wcslen(Expected), "actual path does not match expected");
+  expect(0 == memcmp(Buffer, Expected, result_length + sizeof(WCHAR)), "actual path does not match expected");
+}
+
+static void testCollapsePath(PCWSTR FileName, PCWSTR Expected) {
+  WCHAR Buffer[MAX_PATH + 1];
+  memcpy(Buffer, FileName, (wcslen(FileName) + 1) * sizeof(WCHAR));
+
+  ULONG result_length = RtlpCollapsePath(Buffer, 0, FALSE);
+  fprintf(stderr, "--------\ntest     '%S'\nexpected '%S'\nactual   '%.*S'\n",
+          FileName,
+          Expected,
+          (int)(result_length / sizeof(WCHAR)), Buffer);
+  expect(result_length / sizeof(WCHAR) == wcslen(Expected), "actual path does not match expected");
   expect(0 == memcmp(Buffer, Expected, result_length + sizeof(WCHAR)), "actual path does not match expected");
 }
 
@@ -408,6 +421,15 @@ int main(int argc, char *argv[]) {
     .Environment = L"FOO=Bar\0BAR=Bas\0\0"
   };
   global_peb.ProcessParameters = &peb;
+
+  testCollapsePath(L".", L"");
+  testCollapsePath(L"foo", L"foo");
+  testCollapsePath(L"foo\\bar", L"foo\\bar");
+  testCollapsePath(L"foo\\\\bar", L"foo\\bar");
+  testCollapsePath(L"foo\\\\/bar", L"foo\\bar");
+  testCollapsePath(L"foo/bar", L"foo\\bar");
+  testCollapsePath(L"foo\\..", L"");
+  testCollapsePath(L"foo\\\\..", L"");
 
 
   // TODO: test an invalid path
