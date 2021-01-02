@@ -468,7 +468,7 @@ RtlGetFullPathName_Ustr(
 
 
     /* For now, assume the name is valid */
-    DPRINT("Filename: %wZ\n", FileName);
+    DPRINT("Filename '%.*S'\n", FileName->Length / 2, FileName->Buffer);
     DPRINT("Size and buffer: %lx %p\n", Size, Buffer);
     if (InvalidName) *InvalidName = FALSE;
 
@@ -504,7 +504,7 @@ RtlGetFullPathName_Ustr(
 
     /* Check if this is a DOS name */
     DosLength = RtlIsDosDeviceName_Ustr(FileName);
-    DPRINT("DOS length for filename: %lx %wZ\n", DosLength, FileName);
+    DPRINT("DOS length for filename: %lx '%.*S'\n", DosLength, FileName->Length/2, FileName->Buffer);
     if (DosLength != 0)
     {
         /* Zero out the short name */
@@ -860,8 +860,20 @@ RtlpWin32NTNameToNtPathName_U(IN PUNICODE_STRING DosPath,
 }
 
 
-
-
+static char *GetPathTypeString(RTL_PATH_TYPE type)
+{
+  switch(type) {
+    case RtlPathTypeUnknown: return "Unknown";
+    case RtlPathTypeUncAbsolute: return "UncAbsolute";
+    case RtlPathTypeDriveAbsolute: return "DriveAbsolute";
+    case RtlPathTypeDriveRelative: return "DriveRelative";
+    case RtlPathTypeRooted: return "Rooted";
+    case RtlPathTypeRelative: return "Relative";
+    case RtlPathTypeLocalDevice: return "LocalDevice";
+    case RtlPathTypeRootLocalDevice: return "RootLocalDevice";
+    default: return "???";
+  }
+}
 
 NTSTATUS
 NTAPI
@@ -962,7 +974,7 @@ RtlpDosPathNameToRelativeNtPathName_Ustr(IN BOOLEAN HaveRelative,
 
     /* Check where it really is */
     BufferPathType = RtlDetermineDosPathNameType_U(Buffer);
-    DPRINT("Buffer: %S Type: %lx\n", Buffer, BufferPathType);
+    DPRINT("Buffer: %S Type: %s(%d)\n", Buffer, GetPathTypeString(BufferPathType), BufferPathType);
     switch (BufferPathType)
     {
         /* It's actually a UNC path in \??\UNC\ */
@@ -1005,7 +1017,7 @@ RtlpDosPathNameToRelativeNtPathName_Ustr(IN BOOLEAN HaveRelative,
     NtName->MaximumLength = (USHORT)MaxLength;
     NewBuffer[LengthChars] = UNICODE_NULL;
     DPRINT("New buffer: %S\n", NewBuffer);
-    DPRINT("NT Name: %wZ\n", NtName);
+    DPRINT("NT Name '%.*S'\n", NtName->Length/2, NtName->Buffer);
 
     /* Check if a partial name was requested */
     if ((PartName) && (*PartName))

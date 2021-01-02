@@ -51,10 +51,8 @@ DWORD MAKELONG(
 typedef char CHAR, *PCHAR;
 typedef wchar_t WCHAR;
 typedef WCHAR *PWCHAR;
-typedef WCHAR* WSTR;
-typedef const WCHAR* CWSTR;
 typedef wchar_t *LPWSTR, *PWSTR;
-typedef CWSTR *PCWSTR, *LPCWSTR;
+typedef const wchar_t *PCWSTR, *LPCWSTR;
 
 typedef union _LARGE_INTEGER {
   struct {
@@ -90,9 +88,13 @@ typedef struct _UNICODE_STRING {
 #define STATUS_NOT_IMPL 8
 
 #define NT_SUCCESS(StatCode)  ((NTSTATUS)(StatCode) >= 0)
-#define ASSERT(c) do { \
-    if (!c) { fprintf(stderr, "assert failed\n"); fflush(stderr); exit(1); } \
-} while(0)
+static void ASSERT(int cond) {
+  if (!cond) {
+    fprintf(stderr, "assert failed\n");
+    fflush(stderr);
+    exit(1);
+  }
+}
 
 typedef void* HANDLE;
 
@@ -104,13 +106,11 @@ struct ProcessParameters {
   struct CurrentDirectory CurrentDirectory;
   PWSTR Environment;
 };
-typedef struct PEB {
+struct PEB {
   //PTR(struct _RTL_USER_PROCESS_PARAMETERS*) ProcessParameters;
   struct ProcessParameters *ProcessParameters;
-} PEB, *PPEB;
-struct TEB {
-    PEB *ProcessEnvironmentBlock;
 };
+typedef struct PEB *PPEB;
 struct PEB *NtCurrentPeb();
 static inline void *RtlGetCurrentPeb() { return NULL; }
 static inline void RtlAcquirePebLock() { }
