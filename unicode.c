@@ -11,15 +11,15 @@ RtlInitUnicodeStringEx(
     OUT PUNICODE_STRING DestinationString,
     IN PCWSTR SourceString)
 {
-    SIZE_T Size;
-    CONST SIZE_T MaxSize = (MAXUSHORT & ~1) - sizeof(WCHAR); // an even number
 
     if (SourceString)
     {
-        Size = wcslen(SourceString) * sizeof(WCHAR);
-        if (Size > MaxSize) return STATUS_NAME_TOO_LONG;
-        DestinationString->Length = (USHORT)Size;
-        DestinationString->MaximumLength = (USHORT)Size + sizeof(WCHAR);
+        CONST SIZE_T MAX_SIZE_BYTES = (MAXUSHORT & ~1) - sizeof(WCHAR); // an even number
+
+        size_t SizeBytes = wcslen(SourceString) * sizeof(WCHAR);
+        if (SizeBytes > MAX_SIZE_BYTES) return STATUS_NAME_TOO_LONG;
+        DestinationString->Length = (USHORT)SizeBytes;
+        DestinationString->MaximumLength = (USHORT)SizeBytes + sizeof(WCHAR);
     }
     else
     {

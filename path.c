@@ -4,6 +4,8 @@
 #include "doesfileexists.h"
 #include "env.h"
 
+#define MAX_PATH 260
+
 #define DPRINT(fmt,...) do { fprintf(stderr, fmt, ##__VA_ARGS__); fflush(stderr); } while (0)
 //#define DPRINT1(fmt,...) do { fprintf(stderr, fmt, ##__VA_ARGS__); fflush(stderr); } while (0)
 
@@ -885,7 +887,7 @@ RtlpDosPathNameToRelativeNtPathName_Ustr(IN BOOLEAN HaveRelative,
 {
     WCHAR BigBuffer[MAX_PATH + 1];
     PWCHAR PrefixBuffer, NewBuffer, Buffer;
-    ULONG MaxLength, PathLength, PrefixLength, PrefixCut, LengthChars, Length;
+    ULONG PathLength, PrefixLength, PrefixCut, LengthChars, Length;
     UNICODE_STRING CapturedDosName, PartNameString, FullPath;
     BOOLEAN QuickPath;
     RTL_PATH_TYPE InputPathType, BufferPathType;
@@ -896,7 +898,7 @@ RtlpDosPathNameToRelativeNtPathName_Ustr(IN BOOLEAN HaveRelative,
     /* Assume MAX_PATH for now */
     //DPRINT("Relative: %d DosName: %wZ NtName: %p, PartName: %p, RelativeName: %p\n",
     //        HaveRelative, DosName, NtName, PartName, RelativeName);
-    MaxLength = sizeof(BigBuffer);
+    ULONG MaxLength = sizeof(BigBuffer);
 
     /* Validate the input */
     if (!DosName) return STATUS_OBJECT_NAME_INVALID;

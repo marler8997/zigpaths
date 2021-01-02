@@ -32,8 +32,6 @@ typedef uint32_t ULONG, DWORD;
 typedef int64_t LONGLONG;
 typedef size_t ULONG_PTR;
 
-#define MAX_PATH 1045
-
 #define FALSE 0
 #define TRUE 1
 
@@ -76,6 +74,37 @@ typedef struct _UNICODE_STRING {
   USHORT MaximumLength;
   PWSTR  Buffer;
 } UNICODE_STRING, *PUNICODE_STRING, *PCUNICODE_STRING;
+static inline UNICODE_STRING initUnicodeStringByteSizes(PWSTR Buffer, USHORT LengthBytes, USHORT CapacityBytes)
+{
+  UNICODE_STRING str = { LengthBytes, CapacityBytes, Buffer };
+  return str;
+}
+static inline UNICODE_STRING initUnicodeStringCharSizes(PWSTR Buffer, USHORT LengthChars, USHORT CapacityChars)
+{
+  if (LengthChars & 0x8000) {
+    fprintf(stderr, "Error: initUnicodeStringCharSizes LengthChars = %u is too big\n", LengthChars);
+    exit(1);
+  }
+  if (CapacityChars & 0x8000) {
+    fprintf(stderr, "Error: initUnicodeStringCharSizes CapacityChars = %u is too big\n", CapacityChars);
+    exit(1);
+  }
+  return initUnicodeStringByteSizes(Buffer, LengthChars * 2, CapacityChars * 2);
+}
+static inline UNICODE_STRING initUnicodeStringNullTerm(PWSTR Buffer)
+{
+  if (!Buffer)
+    return initUnicodeStringByteSizes(NULL, 0, 0);
+
+  size_t LengthBytes = wcslen(Buffer) * sizeof(WCHAR);
+
+  static const size_t MAX_SIZE_BYTES = (MAXUSHORT & ~1) - sizeof(WCHAR);
+  if (LengthBytes > MAX_SIZE_BYTES) {
+    fprintf(stderr, "Error: initUnicodeStringNullTerm Length %lu is too large (max=%lu)\n", LengthBytes, MAX_SIZE_BYTES);
+    exit(1);
+  }
+  return initUnicodeStringByteSizes(Buffer, LengthBytes, LengthBytes + sizeof(WCHAR));
+}
 
 #define STATUS_SUCCESS 0
 #define STATUS_OBJECT_NAME_INVALID 1
