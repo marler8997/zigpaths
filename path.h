@@ -8,6 +8,16 @@ ULONG
 NTAPI
 RtlIsDosDeviceName_Ustr(IN PCUNICODE_STRING PathString);
 
+ULONG
+NTAPI
+RtlGetFullPathName_Ustr(
+    _In_ PUNICODE_STRING FileName,
+    _In_ ULONG Size,
+    _Out_z_bytecap_(Size) PWSTR Buffer,
+    _Out_opt_ PCWSTR *ShortName,
+    _Out_opt_ PBOOLEAN InvalidName,
+    _Out_ RTL_PATH_TYPE *PathType);
+
 BOOLEAN
 NTAPI
 RtlDosPathNameToRelativeNtPathName_Ustr(IN PCUNICODE_STRING DosName,

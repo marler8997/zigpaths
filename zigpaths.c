@@ -386,6 +386,22 @@ static void test(PCWSTR DosPathName, PCWSTR Expected) {
   }
 }
 
+static void testGetFullPathName(PCWSTR FileName, PCWSTR Expected) {
+  UNICODE_STRING FileNameUstr = initUnicodeStringNullTerm((PWSTR)FileName);
+  WCHAR Buffer[MAX_PATH + 1];
+  BOOLEAN NameInvalid;
+  RTL_PATH_TYPE PathType;
+
+  ULONG result_length = RtlGetFullPathName_Ustr(&FileNameUstr, sizeof(Buffer), Buffer, NULL, &NameInvalid, &PathType);
+  expect(!NameInvalid, "path '%S' got NameInvalid", FileName);
+  expect(result_length > 0, "GetFullPathName for '%S' failed", FileName);
+  fprintf(stderr, "--------\ntest     '%S'\nexpected '%S'\nactual   '%.*S'\n",
+          FileName,
+          Expected,
+          result_length, Buffer);
+  expect(0 == memcmp(Buffer, Expected, result_length + sizeof(WCHAR)), "actual path does not match expected");
+}
+
 int main(int argc, char *argv[]) {
   struct ProcessParameters peb = {
     .CurrentDirectory = {.DosPath = RTL_CONSTANT_STRING(L"C:\\tmp\\")},
@@ -394,6 +410,11 @@ int main(int argc, char *argv[]) {
   global_peb.ProcessParameters = &peb;
 
 
+  // TODO: test an invalid path
+  //testGetFullPathName(L"foo*", L"C:\\foo");
+  testGetFullPathName(L"foo", L"C:\\tmp\\foo");
+  testGetFullPathName(L"foo\\.", L"C:\\tmp\\foo");
+  testGetFullPathName(L"foo\\..", L"C:\\tmp");
 
   test_RtlDetermineDosPathNameType_U();
   test_RtlIsDosDeviceName_U();
