@@ -11,26 +11,6 @@ struct PEB *NtCurrentPeb() { return &global_peb; }
 
 
 
-
-
-
-
-
-
-#if 0
-#include "ntdll_test.h"
-
-static NTSTATUS (WINAPI *pRtlMultiByteToUnicodeN)( LPWSTR dst, DWORD dstlen, LPDWORD reslen,
-                                                   LPCSTR src, DWORD srclen );
-static NTSTATUS (WINAPI *pRtlUnicodeToMultiByteN)(LPSTR,DWORD,LPDWORD,LPCWSTR,DWORD);
-static UINT (WINAPI *pRtlDetermineDosPathNameType_U)( PCWSTR path );
-static ULONG (WINAPI *pRtlIsDosDeviceName_U)( PCWSTR dos_name );
-static NTSTATUS (WINAPI *pRtlOemStringToUnicodeString)(UNICODE_STRING *, const STRING *, BOOLEAN );
-static BOOLEAN (WINAPI *pRtlIsNameLegalDOS8Dot3)(const UNICODE_STRING*,POEM_STRING,PBOOLEAN);
-static DWORD (WINAPI *pRtlGetFullPathName_U)(const WCHAR*,ULONG,WCHAR*,WCHAR**);
-static NTSTATUS (WINAPI *pRtlDosPathNameToNtPathName_U_WithStatus)(const WCHAR*, UNICODE_STRING*, WCHAR**, CURDIR*);
-#endif
-
 static void expect(int cond, const char *fmt, ...)
 {
   if (!cond) {
@@ -97,12 +77,11 @@ static void test_RtlDetermineDosPathNameType_U(void)
     }
 }
 
-#if 0
 static void test_RtlIsDosDeviceName_U(void)
 {
     struct test
     {
-        const char *path;
+        const WCHAR *path;
         WORD pos;
         WORD len;
         BOOL fails;
@@ -110,71 +89,62 @@ static void test_RtlIsDosDeviceName_U(void)
 
     static const struct test tests[] =
     {
-        { "\\\\.\\CON",    8, 6, TRUE },  /* fails on win8 */
-        { "\\\\.\\con",    8, 6, TRUE },  /* fails on win8 */
-        { "\\\\.\\CON2",   0, 0 },
-        { "",              0, 0 },
-        { "\\\\foo\\nul",  0, 0 },
-        { "c:\\nul:",      6, 6 },
-        { "c:\\nul\\",     0, 0 },
-        { "c:\\nul\\foo",  0, 0 },
-        { "c:\\nul::",     6, 6, TRUE },  /* fails on nt4 */
-        { "c:\\nul::::::", 6, 6, TRUE },  /* fails on nt4 */
-        { "c:prn     ",    4, 6 },
-        { "c:prn.......",  4, 6 },
-        { "c:prn... ...",  4, 6 },
-        { "c:NUL  ....  ", 4, 6, TRUE },  /* fails on nt4 */
-        { "c: . . .",      0, 0 },
-        { "c:",            0, 0 },
-        { " . . . :",      0, 0 },
-        { ":",             0, 0 },
-        { "c:nul. . . :",  4, 6 },
-        { "c:nul . . :",   4, 6, TRUE },  /* fails on nt4 */
-        { "c:nul0",        0, 0 },
-        { "c:prn:aaa",     4, 6, TRUE },  /* fails on win9x */
-        { "c:PRN:.txt",    4, 6 },
-        { "c:aux:.txt...", 4, 6 },
-        { "c:prn:.txt:",   4, 6 },
-        { "c:nul:aaa",     4, 6, TRUE },  /* fails on win9x */
-        { "con:",          0, 6 },
-        { "lpt1:",         0, 8 },
-        { "c:com5:",       4, 8 },
-        { "CoM4:",         0, 8 },
-        { "lpt9:",         0, 8 },
-        { "c:\\lpt0.txt",  0, 0 },
-        { "c:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\nul.txt", 1000, 6 },
+     //{ L"\\\\.\\CON",    8, 6, TRUE },  /* fails on win8 */
+     //{ L"\\\\.\\con",    8, 6, TRUE },  /* fails on win8 */
+        { L"\\\\.\\CON2",   0, 0 },
+        { L"",              0, 0 },
+        { L"\\\\foo\\nul",  0, 0 },
+        //{ L"c:\\nul:",      6, 6 },
+        { L"c:\\nul\\",     0, 0 },
+        { L"c:\\nul\\foo",  0, 0 },
+        //{ L"c:\\nul::",     6, 6, TRUE },  /* fails on nt4 */
+        //{ L"c:\\nul::::::", 6, 6, TRUE },  /* fails on nt4 */
+        //{ L"c:prn     ",    4, 6 },
+        //{ L"c:prn.......",  4, 6 },
+        //{ L"c:prn... ...",  4, 6 },
+        //{ L"c:NUL  ....  ", 4, 6, TRUE },  /* fails on nt4 */
+        { L"c: . . .",      0, 0 },
+        { L"c:",            0, 0 },
+        { L" . . . :",      0, 0 },
+        { L":",             0, 0 },
+        //{ L"c:nul. . . :",  4, 6 },
+        //{ L"c:nul . . :",   4, 6, TRUE },  /* fails on nt4 */
+        { L"c:nul0",        0, 0 },
+        //{ L"c:prn:aaa",     4, 6, TRUE },  /* fails on win9x */
+        //{ L"c:PRN:.txt",    4, 6 },
+        //{ L"c:aux:.txt...", 4, 6 },
+        //{ L"c:prn:.txt:",   4, 6 },
+        //{ L"c:nul:aaa",     4, 6, TRUE },  /* fails on win9x */
+        //{ L"con:",          0, 6 },
+        //{ L"lpt1:",         0, 8 },
+        //{ L"c:com5:",       4, 8 },
+        //{ L"CoM4:",         0, 8 },
+        //{ L"lpt9:",         0, 8 },
+        { L"c:\\lpt0.txt",  0, 0 },
+        //{ L"c:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        //L"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        //L"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        //L"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        //L"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        //L"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        //L"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\nul.txt", 1000, 6 },
         // ReactOS r54114
-        { "c:\\nul",       6, 6 },
+        //{ L"c:\\nul",       6, 6 },
         { NULL, 0 }
     };
 
     const struct test *test;
-    WCHAR buffer[2000];
-    ULONG ret;
-
-    if (!pRtlIsDosDeviceName_U)
-    {
-        win_skip("RtlIsDosDeviceName_U is not available\n");
-        return;
-    }
-
     for (test = tests; test->path; test++)
     {
-        pRtlMultiByteToUnicodeN( buffer, sizeof(buffer), NULL, test->path, strlen(test->path)+1 );
-        ret = pRtlIsDosDeviceName_U( buffer );
-        ok( ret == MAKELONG( test->len, test->pos ) ||
-            (test->fails && broken( ret == 0 )),
-            "Wrong result (%d,%d)/(%d,%d) for %s\n",
-            HIWORD(ret), LOWORD(ret), test->pos, test->len, test->path );
+      UNICODE_STRING ustr = initUnicodeStringNullTerm((PWSTR)test->path);
+      ULONG ret = RtlIsDosDeviceName_Ustr(&ustr);
+      expect(ret == MAKELONG( test->len, test->pos ),
+             "Expected pos=%d len=%d, got pos=%d len=%d  for path '%S'\n",
+             test->pos, test->len, HIWORD(ret), LOWORD(ret), test->path);
     }
 }
 
+#if 0
 static void test_RtlIsNameLegalDOS8Dot3(void)
 {
     struct test
@@ -252,6 +222,9 @@ static void test_RtlIsNameLegalDOS8Dot3(void)
         }
     }
 }
+#endif
+
+#if 0
 static void test_RtlGetFullPathName_U(void)
 {
     static const WCHAR emptyW[] = {0};
@@ -352,7 +325,9 @@ static void test_RtlGetFullPathName_U(void)
         }
     }
 }
+#endif
 
+#if 0
 static void test_RtlDosPathNameToNtPathName_U_WithStatus(void)
 {
     static const WCHAR emptyW[] = { 0 };
@@ -380,31 +355,6 @@ static void test_RtlDosPathNameToNtPathName_U_WithStatus(void)
         "Unexpected status %#x.\n", status);
 
     RtlFreeUnicodeString( &nameW );
-}
-
-START_TEST(path)
-{
-    HMODULE mod = GetModuleHandleA("ntdll.dll");
-    if (!mod)
-    {
-        win_skip("Not running on NT, skipping tests\n");
-        return;
-    }
-
-    pRtlMultiByteToUnicodeN = (void *)GetProcAddress(mod,"RtlMultiByteToUnicodeN");
-    pRtlUnicodeToMultiByteN = (void *)GetProcAddress(mod,"RtlUnicodeToMultiByteN");
-    pRtlDetermineDosPathNameType_U = (void *)GetProcAddress(mod,"RtlDetermineDosPathNameType_U");
-    pRtlIsDosDeviceName_U = (void *)GetProcAddress(mod,"RtlIsDosDeviceName_U");
-    pRtlOemStringToUnicodeString = (void *)GetProcAddress(mod,"RtlOemStringToUnicodeString");
-    pRtlIsNameLegalDOS8Dot3 = (void *)GetProcAddress(mod,"RtlIsNameLegalDOS8Dot3");
-    pRtlGetFullPathName_U = (void *)GetProcAddress(mod,"RtlGetFullPathName_U");
-    pRtlDosPathNameToNtPathName_U_WithStatus = (void *)GetProcAddress(mod, "RtlDosPathNameToNtPathName_U_WithStatus");
-
-    test_RtlDetermineDosPathNameType_U();
-    test_RtlIsDosDeviceName_U();
-    test_RtlIsNameLegalDOS8Dot3();
-    test_RtlGetFullPathName_U();
-    test_RtlDosPathNameToNtPathName_U_WithStatus();
 }
 #endif
 
@@ -449,7 +399,7 @@ int main(int argc, char *argv[]) {
 
 
   test_RtlDetermineDosPathNameType_U();
-
+  test_RtlIsDosDeviceName_U();
 
   test(L"foo", L"\\??\\C:\\tmp\\foo");
   test(L"foo*o", L"\\??\\C:\\tmp\\foo*o");

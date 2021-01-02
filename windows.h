@@ -17,7 +17,7 @@
 #define _Out_z_bytecap_(sz)
 
 #define MAXUSHORT 0xFFFF
-typedef unsigned int BOOLEAN, *PBOOLEAN;
+typedef unsigned int BOOL, BOOLEAN, *PBOOLEAN;
 #define LOGICAL unsigned char
 #define NTSTATUS int
 //#define NULL ((void*)0)

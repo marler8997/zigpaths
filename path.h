@@ -2,6 +2,10 @@ RTL_PATH_TYPE
 NTAPI
 RtlDetermineDosPathNameType_U(IN PCWSTR Path);
 
+ULONG
+NTAPI
+RtlIsDosDeviceName_Ustr(IN PCUNICODE_STRING PathString);
+
 BOOLEAN
 NTAPI
 RtlDosPathNameToRelativeNtPathName_Ustr(IN PCUNICODE_STRING DosName,
